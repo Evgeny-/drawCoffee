@@ -1,16 +1,26 @@
 class Context
-  constructor: (id, w, h) ->
+  constructor: (id, @w, @h) ->
     @canvas = document.getElementById id
-    @canvas.width = w
-    @canvas.height = h
+    @canvas.width = @w
+    @canvas.height = @h
 
     @ctx = @canvas.getContext '2d'
 
+  setBg: (color) ->
+    @ctx.fillStyle = color;
+    @ctx.fillRect 0, 0, @w, @h
+
+  setColor: (color) ->
+    @ctx.strokeStyle = color;
+
+
 class Point
+  color = 'rgb(255,255,245)'
   constructor: (@x, @y) ->
 
   draw: ->
-    @ctx.fillRect @x-2, @y-2,  4, 4
+    @ctx.fillStyle = color;
+    @ctx.fillRect @x-1, @y-1,  3, 3
 
 
 class Line
@@ -26,7 +36,9 @@ class Line
 
 window.addEventListener 'load', ->
 
-  ctx = new Context 'canvas', 900, 600
+  ctx = new Context 'canvas', window.innerWidth, window.innerHeight - 5
+  ctx.setBg 'rgb(111, 78, 55)'
+  ctx.setColor 'rgb(250,250,255)'
 
   Line::ctx = ctx.ctx
   Point::ctx = ctx.ctx
@@ -36,17 +48,16 @@ window.addEventListener 'load', ->
 
   ctx.canvas.addEventListener 'mousedown', (ev) ->
     draw = true
-    prevPoint = point = new Point ev.clientX, ev.clientY
-    point.draw()
+    prevPoint = new Point ev.clientX, ev.clientY
+    prevPoint.draw()
 
   ctx.canvas.addEventListener 'mouseup', (ev) ->
     draw = false
-    prevPoint = point = new Point ev.clientX, ev.clientY
-    point.draw()
+    prevPoint.draw()
+    prevPoint = new Point ev.clientX, ev.clientY
 
   ctx.canvas.addEventListener 'mousemove', (ev) ->
-    return unless draw
-    return if Math.random() > 0.4 # ratio of slow
+    return if not draw or Math.random() > 0.4
     point = new Point ev.clientX, ev.clientY
     line = new Line point, prevPoint
     line.draw()

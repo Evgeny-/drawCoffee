@@ -5,17 +5,31 @@
   Context = (function() {
 
     function Context(id, w, h) {
+      this.w = w;
+      this.h = h;
       this.canvas = document.getElementById(id);
-      this.canvas.width = w;
-      this.canvas.height = h;
+      this.canvas.width = this.w;
+      this.canvas.height = this.h;
       this.ctx = this.canvas.getContext('2d');
     }
+
+    Context.prototype.setBg = function(color) {
+      this.ctx.fillStyle = color;
+      return this.ctx.fillRect(0, 0, this.w, this.h);
+    };
+
+    Context.prototype.setColor = function(color) {
+      return this.ctx.strokeStyle = color;
+    };
 
     return Context;
 
   })();
 
   Point = (function() {
+    var color;
+
+    color = 'rgb(255,255,245)';
 
     function Point(x, y) {
       this.x = x;
@@ -23,7 +37,8 @@
     }
 
     Point.prototype.draw = function() {
-      return this.ctx.fillRect(this.x - 2, this.y - 2, 4, 4);
+      this.ctx.fillStyle = color;
+      return this.ctx.fillRect(this.x - 1, this.y - 1, 3, 3);
     };
 
     return Point;
@@ -50,29 +65,26 @@
 
   window.addEventListener('load', function() {
     var ctx, draw, prevPoint;
-    ctx = new Context('canvas', 900, 600);
+    ctx = new Context('canvas', window.innerWidth, window.innerHeight - 5);
+    ctx.setBg('rgb(111, 78, 55)');
+    ctx.setColor('rgb(250,250,255)');
     Line.prototype.ctx = ctx.ctx;
     Point.prototype.ctx = ctx.ctx;
     prevPoint = null;
     draw = false;
     ctx.canvas.addEventListener('mousedown', function(ev) {
-      var point;
       draw = true;
-      prevPoint = point = new Point(ev.clientX, ev.clientY);
-      return point.draw();
+      prevPoint = new Point(ev.clientX, ev.clientY);
+      return prevPoint.draw();
     });
     ctx.canvas.addEventListener('mouseup', function(ev) {
-      var point;
       draw = false;
-      prevPoint = point = new Point(ev.clientX, ev.clientY);
-      return point.draw();
+      prevPoint.draw();
+      return prevPoint = new Point(ev.clientX, ev.clientY);
     });
     return ctx.canvas.addEventListener('mousemove', function(ev) {
       var line, point;
-      if (!draw) {
-        return;
-      }
-      if (Math.random() > 0.4) {
+      if (!draw || Math.random() > 0.4) {
         return;
       }
       point = new Point(ev.clientX, ev.clientY);
