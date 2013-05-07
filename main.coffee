@@ -15,11 +15,10 @@ class Context
 
 
 class Point
-  color = 'rgb(255,255,245)'
   constructor: (@x, @y) ->
 
   draw: ->
-    @ctx.fillStyle = color;
+    @ctx.fillStyle = 'rgb(255,255,245)';
     @ctx.fillRect @x-1, @y-1,  3, 3
 
 
@@ -51,10 +50,9 @@ window.addEventListener 'load', ->
     prevPoint = new Point ev.clientX, ev.clientY
     prevPoint.draw()
 
-  ctx.canvas.addEventListener 'mouseup', (ev) ->
+  ctx.canvas.addEventListener 'mouseup', ->
     draw = false
     prevPoint.draw()
-    prevPoint = new Point ev.clientX, ev.clientY
 
   ctx.canvas.addEventListener 'mousemove', (ev) ->
     return if not draw or Math.random() > 0.4

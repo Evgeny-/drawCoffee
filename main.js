@@ -27,9 +27,6 @@
   })();
 
   Point = (function() {
-    var color;
-
-    color = 'rgb(255,255,245)';
 
     function Point(x, y) {
       this.x = x;
@@ -37,7 +34,7 @@
     }
 
     Point.prototype.draw = function() {
-      this.ctx.fillStyle = color;
+      this.ctx.fillStyle = 'rgb(255,255,245)';
       return this.ctx.fillRect(this.x - 1, this.y - 1, 3, 3);
     };
 
@@ -77,10 +74,9 @@
       prevPoint = new Point(ev.clientX, ev.clientY);
       return prevPoint.draw();
     });
-    ctx.canvas.addEventListener('mouseup', function(ev) {
+    ctx.canvas.addEventListener('mouseup', function() {
       draw = false;
-      prevPoint.draw();
-      return prevPoint = new Point(ev.clientX, ev.clientY);
+      return prevPoint.draw();
     });
     return ctx.canvas.addEventListener('mousemove', function(ev) {
       var line, point;
