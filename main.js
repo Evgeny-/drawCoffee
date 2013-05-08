@@ -18,8 +18,24 @@
       return this.ctx.fillRect(0, 0, this.w, this.h);
     };
 
+    Context.prototype.getBg = function() {
+      return this.ctx.fillStyle;
+    };
+
     Context.prototype.setColor = function(color) {
       return this.ctx.strokeStyle = color;
+    };
+
+    Context.prototype.getColor = function() {
+      return this.ctx.strokeStyle;
+    };
+
+    Context.prototype.setWidth = function(width) {
+      return this.ctx.lineWidth = width;
+    };
+
+    Context.prototype.getWidth = function() {
+      return this.ctx.lineWidth || 1;
     };
 
     return Context;
@@ -61,32 +77,85 @@
   })();
 
   window.addEventListener('load', function() {
-    var ctx, draw, prevPoint;
+    var bgElement, colorElement, ctx, draw, drawRatio, drawRatioElement, lineWidthElement, prevPoint;
     ctx = new Context('canvas', window.innerWidth, window.innerHeight - 5);
     ctx.setBg('rgb(111, 78, 55)');
-    ctx.setColor('rgb(250,250,255)');
+    ctx.setColor('rgb(255,255,255)');
     Line.prototype.ctx = ctx.ctx;
     Point.prototype.ctx = ctx.ctx;
     prevPoint = null;
     draw = false;
+    drawRatio = 0.7;
     ctx.canvas.addEventListener('mousedown', function(ev) {
       draw = true;
-      prevPoint = new Point(ev.clientX, ev.clientY);
-      return prevPoint.draw();
+      return prevPoint = new Point(ev.layerX, ev.layerY);
     });
     ctx.canvas.addEventListener('mouseup', function() {
-      draw = false;
-      return prevPoint.draw();
+      return draw = false;
     });
-    return ctx.canvas.addEventListener('mousemove', function(ev) {
+    ctx.canvas.addEventListener('mousemove', function(ev) {
       var line, point;
-      if (!draw || Math.random() > 0.4) {
+      if (!draw || Math.random() < drawRatio) {
         return;
       }
-      point = new Point(ev.clientX, ev.clientY);
+      point = new Point(ev.layerX, ev.layerY);
       line = new Line(point, prevPoint);
       line.draw();
       return prevPoint = point;
+    });
+    drawRatioElement = document.getElementById('draw-ratio');
+    drawRatioElement.value = drawRatio;
+    drawRatioElement.addEventListener('change', function(ev) {
+      var _ref;
+      if ((0 <= (_ref = +ev.target.value) && _ref <= 1)) {
+        return drawRatio = +ev.target.value;
+      } else {
+        alert('must be from 0 to 1');
+        return drawRatioElement.value = drawRatio;
+      }
+    });
+    lineWidthElement = document.getElementById('line-width');
+    lineWidthElement.value = ctx.getWidth();
+    lineWidthElement.addEventListener('change', function(ev) {
+      var _ref;
+      if ((0 <= (_ref = +ev.target.value) && _ref < 150)) {
+        return ctx.setWidth(+ev.target.value);
+      } else {
+        alert('must be from 0 to 150');
+        return ev.target.value = ctx.getWidth();
+      }
+    });
+    colorElement = document.getElementById('color');
+    colorElement.value = ctx.getColor();
+    colorElement.addEventListener('change', function(ev) {
+      return ctx.setColor(ev.target.value);
+    });
+    bgElement = document.getElementById('background');
+    bgElement.value = ctx.getBg();
+    bgElement.addEventListener('change', function(ev) {
+      return ctx.setBg(ev.target.value);
+    });
+    document.getElementById('clear').addEventListener('click', function() {
+      return ctx.setBg(bgElement.value);
+    });
+    document.getElementById('save').addEventListener('click', function() {
+      return window.location = ctx.canvas.toDataURL("image/png");
+    });
+    return document.getElementById('image').addEventListener('change', function(ev) {
+      var reader;
+      reader = new FileReader;
+      reader.onload = function(event) {
+        var img;
+        img = new Image();
+        img.onload = function() {
+          ctx.canvas.width = img.width;
+          ctx.canvas.height = img.height;
+          ctx.ctx.drawImage(img, 0, 0);
+          return ctx.setColor(colorElement.value);
+        };
+        return img.src = event.target.result;
+      };
+      return reader.readAsDataURL(ev.target.files[0]);
     });
   });
 

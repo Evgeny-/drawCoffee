@@ -7,10 +7,35 @@
         body {
             margin: 0;
         }
+        #settings {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background: #fff;
+            text-align: right;
+            padding: 5px;
+            border: 1px solid #ccc;
+            opacity: 0.5;
+        }
+        #settings:hover {
+            opacity: 1;
+        }
+        canvas, canvas:active {
+            cursor: default;
+        }
     </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
+<div id="settings">
+    drawRatio: <input id="draw-ratio" type="text"/><br>
+    lineWidth: <input id="line-width" type="text"/><br>
+    color: <input id="color" type="text"><br>
+    background: <input id="background" type="text"><br>
+    <input type="file" id="image" placeholder="choose file"/><br>
+    <button id="save">save as image</button>
+    <button id="clear">clear</button>
+</div>
 <script type="text/javascript" src="main.js"></script>
 </body>
 </html>

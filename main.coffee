@@ -7,11 +7,23 @@ class Context
     @ctx = @canvas.getContext '2d'
 
   setBg: (color) ->
-    @ctx.fillStyle = color;
+    @ctx.fillStyle = color
     @ctx.fillRect 0, 0, @w, @h
 
+  getBg: ->
+    @ctx.fillStyle
+
   setColor: (color) ->
-    @ctx.strokeStyle = color;
+    @ctx.strokeStyle = color
+
+  getColor: ->
+    @ctx.strokeStyle
+
+  setWidth: (width) ->
+    @ctx.lineWidth = width
+
+  getWidth: ->
+    @ctx.lineWidth or 1
 
 
 class Point
@@ -37,26 +49,73 @@ window.addEventListener 'load', ->
 
   ctx = new Context 'canvas', window.innerWidth, window.innerHeight - 5
   ctx.setBg 'rgb(111, 78, 55)'
-  ctx.setColor 'rgb(250,250,255)'
+  ctx.setColor 'rgb(255,255,255)'
 
   Line::ctx = ctx.ctx
   Point::ctx = ctx.ctx
 
   prevPoint = null
   draw = false
+  drawRatio = 0.7
 
   ctx.canvas.addEventListener 'mousedown', (ev) ->
     draw = true
-    prevPoint = new Point ev.clientX, ev.clientY
-    prevPoint.draw()
+    prevPoint = new Point ev.layerX, ev.layerY
+    #prevPoint.draw()
 
   ctx.canvas.addEventListener 'mouseup', ->
     draw = false
-    prevPoint.draw()
+    #prevPoint.draw()
 
   ctx.canvas.addEventListener 'mousemove', (ev) ->
-    return if not draw or Math.random() > 0.4
-    point = new Point ev.clientX, ev.clientY
+    return if not draw or Math.random() < drawRatio
+    point = new Point ev.layerX, ev.layerY
     line = new Line point, prevPoint
     line.draw()
     prevPoint = point
+
+  drawRatioElement = document.getElementById 'draw-ratio'
+  drawRatioElement.value = drawRatio
+  drawRatioElement.addEventListener 'change', (ev) ->
+    if 0 <= +ev.target.value <= 1
+      drawRatio = +ev.target.value
+    else
+      alert 'must be from 0 to 1'
+      drawRatioElement.value = drawRatio
+
+  lineWidthElement = document.getElementById 'line-width'
+  lineWidthElement.value = ctx.getWidth()
+  lineWidthElement.addEventListener 'change', (ev) ->
+    if 0 <= +ev.target.value < 150
+      ctx.setWidth +ev.target.value
+    else
+      alert 'must be from 0 to 150'
+      ev.target.value = ctx.getWidth()
+
+  colorElement = document.getElementById 'color'
+  colorElement.value = ctx.getColor()
+  colorElement.addEventListener 'change', (ev) ->
+    ctx.setColor ev.target.value
+
+  bgElement = document.getElementById 'background'
+  bgElement.value = ctx.getBg()
+  bgElement.addEventListener 'change', (ev) ->
+    ctx.setBg ev.target.value
+
+  document.getElementById('clear').addEventListener 'click', ->
+    ctx.setBg bgElement.value
+
+  document.getElementById('save').addEventListener 'click', ->
+    window.location = ctx.canvas.toDataURL "image/png"
+
+  document.getElementById('image').addEventListener 'change', (ev) ->
+    reader = new FileReader
+    reader.onload = (event) ->
+      img = new Image();
+      img.onload = ->
+        ctx.canvas.width = img.width
+        ctx.canvas.height = img.height
+        ctx.ctx.drawImage img, 0 ,0
+        ctx.setColor colorElement.value
+      img.src = event.target.result
+    reader.readAsDataURL ev.target.files[0]
